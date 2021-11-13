@@ -12,13 +12,53 @@ library(purrr)
 
 ## Problem 2
 
-```{r}
+```{r message=FALSE}
 dir = "./data"
 file_list = list.files(path = dir, pattern = "*.csv$", full.names = TRUE, recursive = TRUE)
 longitudinal_df = map_df(file_list, read_csv, id = "input") %>% 
   mutate(participant = recode(input, './data/con_01.csv' = "con_01", './data/con_02.csv' = "con_02", './data/con_03.csv' = "con_03", './data/con_04.csv' = "con_04", './data/con_05.csv' = "con_05", './data/con_06.csv' = "con_06", './data/con_07.csv' = "con_07", './data/con_08.csv' = "con_08", './data/con_09.csv' = "con_09", './data/con_10.csv' = "con_10", './data/exp_01.csv' = "exp_01", './data/exp_02.csv' = "exp_02", './data/exp_03.csv' = "exp_03", './data/exp_04.csv' = "exp_04", './data/exp_05.csv' = "exp_05", './data/exp_06.csv' = "exp_06", './data/exp_07.csv' = "exp_07", './data/exp_08.csv' = "exp_08", './data/exp_09.csv' = "exp_09", './data/exp_10.csv' = "exp_10")) %>% 
   select(-input) %>% 
-  select(participant, everything())
+  select(participant, everything()) %>%
+  separate(participant, into = c("arm", "id"), sep = "\\_") %>% 
+  mutate(arm = recode(arm, 'con' = "control", 'exp' = "experimental")) %>%
+  pivot_longer(
+    week_1 : week_8,
+    names_to = "time_week",
+    names_prefix = "week_",
+    values_to = "observations"
+  )
 longitudinal_df
+```
+
+```{r}
+ggplot(data = longitudinal_df, aes(x = time_week, y = observations, color = id)) +
+  geom_line(aes(group = id)) +
+  facet_grid(. ~ arm)
+```
+
+**From the spaghetti plot we can learn that participants in control group have steady observations while participants in experimental group have increasing observations. According to this, we can initially guess that the experimental arm will lead to a higher obsevation.**
+
+## Problem 3
+
+```{r}
+set.seed(10)
+
+iris_with_missing = iris %>% 
+  map_df(~replace(.x, sample(1:150, 20), NA)) %>%
+  mutate(Species = as.character(Species)) 
+```
+
+
+```{r}
+
+iris_na = function(x) {
+  if (is.numeric(x)){x[is.na(x)] = mean(x,na.rm = T)
+  return(x)
+  }else if (is.character(x)) {
+    x[is.na(x)] = "virginica"
+    return(x)
+  }}
+iris_df = map_df(iris_with_missing, iris_na)
+iris_df
 ```
 
