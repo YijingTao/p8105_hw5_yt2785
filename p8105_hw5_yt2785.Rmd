@@ -143,9 +143,11 @@ longitudinal_df
 ```
 
 ```{r}
-ggplot(data = longitudinal_df, aes(x = time_week, y = observations, color = id)) +
-  geom_line(aes(group = id)) +
-  facet_grid(. ~ arm)
+longitudinal_df %>% 
+  mutate(group = str_c(arm, id, sep = "_")) %>% 
+ggplot(aes(x = time_week, y = observations, color = arm)) +
+  geom_point() +
+  geom_line(aes(group = group))
 ```
 
 **From the spaghetti plot we can learn that participants in control group have steady observations while participants in experimental group have increasing observations. According to this, we can initially guess that the experimental arm will lead to a higher obsevation.**
