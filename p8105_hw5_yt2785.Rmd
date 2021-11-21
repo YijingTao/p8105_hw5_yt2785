@@ -179,7 +179,8 @@ iris_na = function(x) {
     x[is.na(x)] = "virginica"
     return(x)
   }}
-iris_df = map_df(iris_with_missing, iris_na)
+iris_df = map(iris_with_missing, iris_na) %>% 
+  as_tibble()
 iris_df
 ```
 
